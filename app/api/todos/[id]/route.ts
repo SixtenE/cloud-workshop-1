@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { storage } from '@/lib/storage';
+import { NextRequest, NextResponse } from "next/server";
+import { storage } from "@/lib/storage";
+import { createClient } from "redis";
 
 export async function DELETE(
   request: NextRequest,
@@ -8,13 +9,12 @@ export async function DELETE(
   const { id } = params;
 
   if (!id) {
-    return NextResponse.json(
-      { error: 'ID is required' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "ID is required" }, { status: 400 });
   }
 
-  storage.remove(id);
+  const redis = await createClient({ url: process.env.REDIS_URL }).connect();
+  //storage.remove(id);
+  await redis.del(id);
 
   return NextResponse.json({ success: true });
 }
